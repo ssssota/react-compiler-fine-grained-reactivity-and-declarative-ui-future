@@ -1,0 +1,50 @@
+:root {
+  /* default theme color */
+  /* can be overrided by uses `themeConfig` option */
+  --slidev-theme-primary: #5d8392;
+}
+
+.slidev-layout {
+  @apply tracking-wide;
+  :where(h1) {
+    @apply text-6xl leading-20 my-8;
+  }
+  :where(h2) {
+    @apply text-4xl my-6;
+  }
+  :where(h3) {
+    @apply text-3xl my-6;
+  }
+  :where(h4) {
+    @apply text-2xl my-4;
+  }
+  :where(h5) {
+    @apply text-2xl my-4;
+  }
+  :where(h6) {
+    @apply text-2xl my-4;
+  }
+  :where(p, div) {
+    @apply text-2xl my-4;
+  }
+  :where(pre, code) {
+    @apply text-xl;
+  }
+  --slidev-code-font-size: 1.25rem;
+  --slidev-code-line-height: 1.5rem;
+}
+
+.slidev-layout.cover,
+.slidev-layout.intro {
+  @apply h-full grid;
+
+  h1 + p {
+    @apply -mt-2 opacity-50 mb-4;
+  }
+
+  p + h2,
+  ul + h2,
+  table + h2 {
+    @apply mt-10;
+  }
+}
