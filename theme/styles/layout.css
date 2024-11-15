@@ -27,6 +27,10 @@
   :where(p, div) {
     @apply text-2xl my-4;
   }
+  p {
+    @apply leading-snug;
+    word-break: auto-phrase;
+  }
   :where(pre, code) {
     @apply text-xl;
   }

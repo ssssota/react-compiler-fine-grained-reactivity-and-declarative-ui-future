@@ -53,8 +53,9 @@ h1 {
 ```
 
 今日喋る技術、React/Vue.js/Svelteいずれかの技術に強いこだわりはありません。
+<span v-click>が、Svelte界隈に出没しがちです。</span>
 
-どれが良い/悪いという話はしません（わかりません）。
+どれが良い/悪いという話はしません。みんな違ってみんないい。
 
 <style>
 ruby {
@@ -99,70 +100,102 @@ function App({ name }) {
 例えばこんなコンポーネントを考える。
 
 ---
+clicks: 5
+---
 
 ## 仮想DOMのしくみ
 
-<div class="grid grid-cols-2">
-  <div v-click="1" class="m-0">
+<div class="grid grid-cols-2 gap-1">
+  <ClickedOutline :click="1" class="m-0">
     0. 初回レンダリング時の仮想DOM
-    <Excalidraw
-      drawFilePath="./vdom.before.excalidraw"
-      class="h-fit"
-      :darkMode="false"
-      :background="false"
-    />
-  </div>
+    <Excalidraw drawFilePath="./vdom.before.excalidraw" class="h-fit" />
+  </ClickedOutline>
 
-  <div v-click="2" class="m-0">
+  <ClickedOutline :click="2" class="m-0">
     1. 状態変化時 仮想DOMを再構築する
-    <Excalidraw
-      drawFilePath="./vdom.after.excalidraw"
-      class="h-fit"
-      :darkMode="false"
-      :background="false"
-    />
-  </div>
+    <Excalidraw drawFilePath="./vdom.after.excalidraw" class="h-fit" />
+  </ClickedOutline>
 </div>
 
-<div v-click="3">
+<ClickedOutline :click="3">
 2. 仮想DOMが構築できたら、差分を検出する (reconciliation / diffing)
-<Arrow x1="230" y1="355" x2="505" y2="355" two-way color="#d21" />
-</div>
-<div v-click="4">
+</ClickedOutline>
+<Arrow v-click="4" x1="230" y1="355" x2="500" y2="355" width="5" two-way color="#d21" />
+<ClickedOutline :click="5">
 3. 検出した差分をもとに、実際のDOMに反映する (render, commit)
-</div>
+</ClickedOutline>
 
 ---
 
 ## Virtual DOM is pure overhead
 
-仮想DOMは、純粋なオーバーヘッドであるという意見。
+「仮想DOMは純粋なオーバーヘッドである」という意見。
 
 Svelte作者のRich Harris氏が6年前に公開したブログ。
+ことの発端はReactが速いという当時の主張。
 
----
+Svelteは当時からSvelteコンポーネントをコンパイルすることで、仮想DOMを使わない宣言的UIを実現していた。
 
-## 当時のSvelteの答え
-
-状態が変化時に通知する→変化箇所を特定(dirty check)→変化箇所に紐づくDOMを更新
+状態が変化時に通知する  
+→変化箇所を特定(dirty check)  
+→変化箇所に紐づくDOMを更新
 
 ---
 
 ## SolidJS
 
-signalの台頭。
+3年前、SolidJSが登場。Reactと同じくJSXを採用しながら、仮想DOMを使わない宣言的UIを実現。
 
-状態は全てsignalで管理。状態が変化すると、それを検知してsignalに紐づくDOMを更新。
+状態は全てSignalで管理。Signalの値が変化すると、それを検知して該当のSignalが使われたDOMを更新。
 
-いわゆるFine Grained Reactivity。
+これがいわゆる**Fine Grained Reactivity**。
 
-SolidJSは、登場当初Reactライクなインターフェースを主張していたものの、signalの追跡のため、単一の `return` 制約やJSXブロック内で `Array.prototype.map` や条件演算子が使えないという制約があった。
+> Fine-grained: きめの細かい
+
+---
+
+## Signal / Signals
+
+Fine Grained ReactivityのベースにあるのがSignal。SignalはStreamやObservableのような概念で、単一の値を持ちその値が変化すると通知できる。
+
+StreamやObservableではなく、Signalが宣言的UIで重宝されるのはインターフェースと柔軟性のバランスが取れているため。
+
+暗黙的な購読は特徴的。以下は複数の状態を購読する例。
+
+````md magic-move
+```js
+// React Hooks
+const [count, setCount] = useState(0);
+const [message, setMessage] = useState("");
+useEffect(() => {
+  console.log(count, message);
+}, [count, message]);
+```
+
+```js
+// Observable (RxJS)
+const count$ = new Subject(0);
+const message$ = new Subject("");
+zip(count$, message$).subscribe(([count, message]) => {
+  console.log(count, message);
+});
+```
+
+```js
+// Vue.js Composition API
+const count = ref(0);
+const message = ref("");
+watchEffect(() => {
+  console.log(count.value, message.value);
+});
+```
+````
 
 ---
 
 ## Svelte 5 / Vue Vapor
 
-いずれもsignalを導入。
+いずれもSignalを導入。
 
 SolidJSとは異なりDSLを提供しているため、SolidJSのような直感に反する制約を軽減している、とも言える。
 
