@@ -24,10 +24,14 @@
   :where(h6) {
     @apply text-2xl my-4;
   }
-  :where(p, div) {
+  :where(p) {
     @apply text-2xl my-4;
   }
-  p {
+  :where(li) {
+    @apply text-2xl;
+  }
+  p,
+  li {
     @apply leading-snug;
     word-break: auto-phrase;
   }

@@ -2,14 +2,12 @@
 # You can also start simply with 'default'
 theme: ohkime
 # some information about your slides (markdown enabled)
-title: React CompilerとFine Grained Reactivityと宣言的UIのこれから
+title: React CompilerとFine-Grained Reactivityと宣言的UIのこれから
 info: |
   JSConfJP 2024
 # https://sli.dev/features/drawing
 drawings:
   persist: false
-# slide transition: https://sli.dev/guide/animations.html#slide-transitions
-transition: slide-left
 # enable MDC Syntax: https://sli.dev/features/mdc
 mdc: true
 # take snapshot for each slide in the overview
@@ -21,7 +19,7 @@ fonts:
   weights: "200,400,700"
 ---
 
-<h1>React Compilerと<br/>Fine Grained Reactivityと<br/>宣言的UIのこれから</h1>
+<h1>React Compilerと<br/>Fine-Grained Reactivityと<br/>宣言的UIのこれから</h1>
 
 JSConf JP 2024 - TOMIKAWA Sotaro (ssssota)
 
@@ -51,11 +49,6 @@ h1 {
 ```json
 { "x": "ssssotaro", "github": "ssssota" }
 ```
-
-今日喋る技術、React/Vue.js/Svelteいずれかの技術に強いこだわりはありません。
-<span v-click>が、Svelte界隈に出没しがちです。</span>
-
-どれが良い/悪いという話はしません。みんな違ってみんないい。
 
 <style>
 ruby {
@@ -100,63 +93,109 @@ function App({ name }) {
 例えばこんなコンポーネントを考える。
 
 ---
-clicks: 5
----
 
 ## 仮想DOMのしくみ
 
 <div class="grid grid-cols-2 gap-1">
-  <ClickedOutline :click="1" class="m-0">
-    0. 初回レンダリング時の仮想DOM
-    <Excalidraw drawFilePath="./vdom.before.excalidraw" class="h-fit" />
-  </ClickedOutline>
 
-  <ClickedOutline :click="2" class="m-0">
-    1. 状態変化時 仮想DOMを再構築する
-    <Excalidraw drawFilePath="./vdom.after.excalidraw" class="h-fit" />
-  </ClickedOutline>
+<div
+  v-click="1"
+  class="outline-blue-500/50 outline-4 m-0"
+  :class="{outline: $clicks === 1 && $renderContext === 'slide'}"
+>
+
+0\. 初回レンダリング時の仮想DOM
+
+<Excalidraw drawFilePath="./vdom.before.excalidraw" class="h-fit" />
+
 </div>
 
-<ClickedOutline :click="3">
-2. 仮想DOMが構築できたら、差分を検出する (reconciliation / diffing)
-</ClickedOutline>
-<Arrow v-click="4" x1="230" y1="355" x2="500" y2="355" width="5" two-way color="#d21" />
-<ClickedOutline :click="5">
-3. 検出した差分をもとに、実際のDOMに反映する (render, commit)
-</ClickedOutline>
+<div
+  v-click="2"
+  class="outline-blue-500/50 outline-4 m-0"
+  :class="{outline: $clicks === 2 && $renderContext === 'slide'}"
+>
+
+1\. 状態変化時 仮想DOMを再構築する
+
+<Excalidraw drawFilePath="./vdom.after.excalidraw" class="h-fit" />
+
+</div>
+
+</div>
+
+<div
+  v-click="3"
+  class="outline-blue-500/50 outline-4 m-0"
+  :class="{outline: $clicks === 3 && $renderContext === 'slide'}"
+>
+
+2\. 仮想DOMが構築できたら、差分を検出する (reconciliation / diffing)
+
+</div>
+<Arrow v-click="4" x1="230" y1="370" x2="500" y2="370" width="5" two-way color="#d21" />
+<div
+  v-click="5"
+  class="outline-blue-500/50 outline-4 m-0"
+  :class="{outline: $clicks === 5 && $renderContext === 'slide'}"
+>
+
+3\. 検出した差分をもとに、実際のDOMに反映する (render, commit)
+
+</div>
 
 ---
 
 ## Virtual DOM is pure overhead
 
-「仮想DOMは純粋なオーバーヘッドである」という意見。
+Svelte作者のRich Harris氏が6年前に公開したブログ。  
+今後の宣言的UIを考える上での重要なキーワード。
 
-Svelte作者のRich Harris氏が6年前に公開したブログ。
-ことの発端はReactが速いという当時の主張。
+<v-clicks>
 
-Svelteは当時からSvelteコンポーネントをコンパイルすることで、仮想DOMを使わない宣言的UIを実現していた。
+1. 仮想DOMの差分検出自体コストがかかる
+   - 仮想DOMツリーを探索して、効率よく実際のDOMに適用するための差分を検出する必要がある
+   - Reactでは $O(n)$ のアルゴリズムを使っているとされる(コスト小)
+2. 仮想DOMの構築自体コストがかかる
+   - 仮想DOMツリーの構築では何度も様々なアロケーションが発生する
+     - 各種配列、仮想DOM自体のオブジェクト、インライン関数、、、
+
+</v-clicks>
+
+---
+
+## Svelte
+
+Svelteは8年前からSvelteコンポーネントをコンパイルすることで、仮想DOMを使わない宣言的UIを実現していた。
 
 状態が変化時に通知する  
 →変化箇所を特定(dirty check)  
 →変化箇所に紐づくDOMを更新
 
+これも今は昔なので省略。
+
 ---
 
 ## SolidJS
 
-3年前、SolidJSが登場。Reactと同じくJSXを採用しながら、仮想DOMを使わない宣言的UIを実現。
+3年前、SolidJS(v1)が登場。Reactと同じくJSXを採用しながら、仮想DOMを使わない宣言的UIを実現。  
+(v0.1から数えると6年前から仮想DOMもdirty checkも使わない宣言的UIを実現していた)
 
 状態は全てSignalで管理。Signalの値が変化すると、それを検知して該当のSignalが使われたDOMを更新。
 
-これがいわゆる**Fine Grained Reactivity**。
+<v-click>
+
+これがいわゆる**Fine-Grained Reactivity**。
 
 > Fine-grained: きめの細かい
+
+</v-click>
 
 ---
 
 ## Signal / Signals
 
-Fine Grained ReactivityのベースにあるのがSignal。SignalはStreamやObservableのような概念で、単一の値を持ちその値が変化すると通知できる。
+Fine-Grained Reactivityのベースにあるのが**Signal**。SignalはStreamやObservableのような概念で、単一の値を持ちその値が変化すると通知できる。
 
 StreamやObservableではなく、Signalが宣言的UIで重宝されるのはインターフェースと柔軟性のバランスが取れているため。
 
@@ -182,7 +221,7 @@ zip(count$, message$).subscribe(([count, message]) => {
 ```
 
 ```js
-// Vue.js Composition API
+// Vue.js Composition API (=Signal)
 const count = ref(0);
 const message = ref("");
 watchEffect(() => {
@@ -193,19 +232,224 @@ watchEffect(() => {
 
 ---
 
-## Svelte 5 / Vue Vapor
+## SolidJSの弱点
 
-いずれもSignalを導入。
+SolidJSのコンポーネントは1度しか実行されない。その1度でコンポーネントのすべての状態を返す必要がある(イメージ)。
+また、それゆえの制約がある。
 
-SolidJSとは異なりDSLを提供しているため、SolidJSのような直感に反する制約を軽減している、とも言える。
+````md magic-move
+```jsx
+// 早期リターンができない
+function App() {
+  const [count, setCount] = createSignal(0);
+  if (count() === 0) {
+    return <button onClick={() => setCount(1)}>Start!</button>;
+  }
+  return <p>Count is {count()}</p>;
+}
+```
+
+```jsx
+// 早期リターンができない
+function App() {
+  const [count, setCount] = createSignal(0);
+  return (
+    <Show
+      when={count() !== 0}
+      fallback={<button onClick={() => setCount(1)}>Start!</button>}
+    >
+      <p>Count is {count()}</p>
+    </Show>
+  );
+}
+```
+
+```jsx
+// 算出プロパティを使う時は関数にする
+function App() {
+  const [count, setCount] = createSignal(0);
+  const double = count() * 2;
+  return (
+    <p>
+      {count()} * 2 = {double}
+    </p>
+  );
+}
+```
+
+```jsx
+// 算出プロパティを使う時は関数にする
+function App() {
+  const [count, setCount] = createSignal(0);
+  const double = () => count() * 2;
+  return (
+    <p>
+      {count()} * 2 = {double()}
+    </p>
+  );
+}
+```
+````
+
+---
+
+## Svelte 5 と Vue Vapor
+
+いずれもFine-Grained Reactivityを実現。(Svelte 5は10月リリース、Vue VaporはWIP)
+
+SolidJSとは異なり独自の文法を提供しているため、「SolidJSのような制約を軽減している」とも言える。そもそもリターンを書かないから早期リターンもない。
+
+Vue Vaporは仮想DOMモードと同じコード(SFC)で利用できる。  
+Svelte 5はSvelte 3,4の文法もサポートしている。新しい文法もmigrationツールで移行が容易。
+
+---
+
+## SolidJS と Svelte 5 と Vue Vapor
+
+いずれも開発者が書いたコードがコンパイルされ、関数コンポーネントになる。  
+この関数コンポーネントは実際のDOMを返す(Svelteは若干異なるが省略)。
+
+<div class="flex justify-between items-start">
+
+<!-- prettier-ignore -->
+```vue
+<!-- コンパイル前 -->
+<script setup>
+defineProps(["name"]);
+</script>
+<template>
+  <h1>
+    Hello {{ name }}!
+  </h1>
+</template>
+```
+
+<v-click>
+
+<!-- prettier-ignore -->
+```js
+// コンパイル後 (一部手で調整)
+const t0 = _template("<h1></h1>")
+function render(_ctx, $props) {
+  const n0 = t0()
+  _renderEffect(() => {
+    _setText(n0, "Hello ", $props.name, "!")
+  })
+  return n0
+}
+```
+
+</v-click>
+
+</div>
+
+---
+
+## Fine-Grained Reactivity
+
+_Virtual DOM is pure overhead_ に対する1つの答えが  
+**Fine-Grained Reactivity**。
+
+そもそも仮想DOMを使わなければ、仮想DOMのオーバーヘッドはなくなる。
+
+オブジェクトや関数のアロケーションも、関数コンポーネント自体は一度しか呼ばれないので問題にならない。
+
+主なプレイヤーは**SolidJS**、**Svelte 5**、**Vue Vapor**。
 
 ---
 
 ## Reactの答え
 
-Virtual DOM is pure overhead に対するReactの答えが、React Compiler。
+_Virtual DOM is pure overhead_ に対するReactの答えが  
+**React Compiler**。
 
-仮想DOMのオーバーヘッドである、差分検出、仮想DOMツリー構築をコンパイラによりメモ化することで極限までオーバーヘッドを減らす。
+基本的には、仮想DOMツリー構築が問題だった。なぜ問題か？
+
+<v-clicks>
+
+- 状態が変化すると、仮想DOM**ツリー**を再構築する必要がある
+- →ひとつの状態変化に対して、複数のコンポーネントが再構築される
+- ひとつひとつのコンポーネントのアロケーションコスト、塵も積もれば山となる
+
+</v-clicks>
+
+<v-click>
+
+この問題に対してReact Compilerは最適化を図る。
+
+</v-click>
+
+---
+
+## 例：仮想DOMオブジェクトのアロケーションコスト削減
+
+<div class="grid grid-cols-2 gap-1">
+
+```jsx
+function App({ name }) {
+  return <h1>Hello {name}!</h1>;
+}
+```
+
+<v-click>
+
+```jsx
+function App(t0) {
+  const $ = _c(2);
+  const { name } = t0;
+  let t1;
+  if ($[0] !== name) {
+    t1 = <h1>Hello {name}!</h1>;
+    $[0] = name;
+    $[1] = t1;
+  } else {
+    t1 = $[1];
+  }
+  return t1;
+}
+```
+
+</v-click>
+
+</div>
+
+---
+
+## 例：関数のアロケーションコスト削減
+
+<div class="grid grid-cols-2 gap-1">
+
+```jsx
+function List({ items }) {
+  return (
+    <ul>
+      {item.map((item) => {
+        return <li>{item}</li>;
+      })}
+    </ul>
+  );
+}
+```
+
+<v-click>
+
+```jsx
+function List(t0) {
+  const $ = _c(4);
+  const { items } = t0;
+  let t1;
+  if ($[0] !== items) {
+    t1 = items.map(_temp);
+  // . . .
+}
+function _temp(item) {
+  return <li>{item}</li>;
+}
+```
+
+</v-click>
+
+</div>
 
 ---
 
