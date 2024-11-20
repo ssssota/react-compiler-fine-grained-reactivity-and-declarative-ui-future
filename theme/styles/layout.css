@@ -35,6 +35,9 @@
     @apply leading-snug;
     word-break: auto-phrase;
   }
+  ol li {
+    margin-left: 1.5em;
+  }
   :where(pre, code) {
     @apply text-xl;
   }

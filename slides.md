@@ -74,7 +74,8 @@ rt {
 - Web: React, Vue.js, Svelte, etc...
 - モバイル: React Native, Flutter, SwiftUI, Jetpack Compose, etc...
 
-APIはそれぞれ少しずつ異なるものの、**「状態をもとにUIを宣言する」**という基本的な考え方は共通している。
+APIはそれぞれ少しずつ異なるものの、  
+**「状態をもとにUIを宣言する」** という基本的な考え方は共通している。
 
 今日はWeb開発における宣言的UIのこれまでとこれからを考える。
 
@@ -89,9 +90,11 @@ APIはそれぞれ少しずつ異なるものの、**「状態をもとにUIを�
 
 宣言的UIのこれからを語る上で、仮想DOMをまずは振り返る。
 
+[*1]: https://qiita.com/mizchi/items/4d25bc26def1719d52e6
+
 ---
 
-## 仮想DOMとはなんであったか
+## 仮想DOMのしくみ
 
 ```jsx
 function App({ name }) {
@@ -163,7 +166,7 @@ function App({ name }) {
 ## Virtual DOM is pure overhead
 
 Svelte作者のRich Harris氏が6年前に公開したブログ。  
-今後の宣言的UIを考える上での重要なキーワード。
+今後の宣言的UIを考える上でのキーワード。仮想DOMは純粋なオーバーヘッド。
 
 <v-clicks>
 
@@ -176,24 +179,148 @@ Svelte作者のRich Harris氏が6年前に公開したブログ。
 
 </v-clicks>
 
+[*1]: https://svelte.dev/blog/virtual-dom-is-pure-overhead
+[*2]: https://ja.legacy.reactjs.org/docs/reconciliation.html#motivation
+
 ---
 
-## Svelte
+## React Compiler
 
-Svelteは8年前からSvelteコンポーネントをコンパイルすることで、仮想DOMを使わない宣言的UIを実現していた。
+React Conf 2021で発表されたReact Compiler (当時React Forget)。  
+これが、先の問題を解決する。
 
-状態が変化時に通知する  
-→変化箇所を特定(dirty check)  
-→変化箇所に紐づくDOMを更新
+> 2. 仮想DOMの構築自体コストがかかる
+>    - 仮想DOMツリーの構築では何度も様々なアロケーションが発生する
+>      - 各種配列、仮想DOM自体のオブジェクト、インライン関数、、、
 
-これも今は昔なので省略。
+<v-click>
+
+様々なアロケーションとは？どのように解決するのか？
+
+</v-click>
+
+[*1]: https://ja.react.dev/blog/2021/12/17/react-conf-2021-recap#react-without-memo
+
+---
+
+## 例：仮想DOMオブジェクトのアロケーションコスト削減
+
+<div class="grid grid-cols-2 gap-1">
+
+```jsx
+function App({ name }) {
+  return <h1>Hello {name}!</h1>;
+}
+```
+
+<v-click>
+
+<a href="https://playground.react.dev/#N4Igzg9grgTgxgUxALhAMygOzgFwJYSYAEAggA5kAUwRmAhgLYJEC+AlEcADrFEwI5YxADwALAIwA+ABIIANnIid6TFgEJhAegmSA3DxYgWQA" target="_blank" rel="noreferrer">
+
+```jsx
+function App(t0) {
+  const $ = _c(2);
+  const { name } = t0;
+  let t1;
+  if ($[0] !== name) {
+    t1 = <h1>Hello {name}!</h1>;
+    $[0] = name;
+    $[1] = t1;
+  } else {
+    t1 = $[1]; // nameが同じ→再利用
+  }
+  return t1;
+}
+```
+
+</a>
+
+</v-click>
+
+</div>
+
+---
+
+## 例：関数のアロケーションコスト削減
+
+<div class="grid grid-cols-2 gap-1">
+
+```jsx
+function List({ items }) {
+  return (
+    <ul>
+      {item.map((item) => {
+        return <li>{item}</li>;
+      })}
+    </ul>
+  );
+}
+```
+
+<v-click>
+
+<a href="https://playground.react.dev/#N4Igzg9grgTgxgUxALhAMygOzgFwJYSYAEAMnmDgBTBF44IC2YRAvgJRHAA6xRMCOWMUo8iYogB4oAGwB8o8WOB1GAOgYBDAA6VKKhhwC8szgsVj+gmMQnS8s5fQYsJAejuyA3GfHsWPtxl5XjZvTBYQFiA" target="_blank" rel="noreferrer">
+
+```jsx
+function List(t0) {
+  const $ = _c(4);
+  const { items } = t0;
+  let t1;
+  if ($[0] !== items) {
+    t1 = items.map(_temp);
+  // . . .
+}
+// ↓トップレベルへ移動
+function _temp(item) {
+  return <li>{item}</li>;
+}
+```
+
+</a>
+
+</v-click>
+
+</div>
+
+---
+
+## React Compiler
+
+我々開発者がカジュアルに書いたインライン関数やオブジェクトは、  
+仮想DOM構築時にアロケーションされる。
+
+それらをReact Compilerが最適化する。
+
+1. 仮想DOMオブジェクトをキャッシュする
+2. インライン関数をトップレベルに移動する/キャッシュする
+
+状態変化時、通常は状態が変化したコンポーネントの子孫も再構築されるが、  
+React Compilerでは再構築されるコンポーネントを最小限に抑える。
+
+Reactのルールに従っていないコンポーネントは矯正する(ESLintプラグイン)。
+
+---
+
+## JSXというメリット
+
+いまでは様々なフレームワークが利用しているJSX。  
+当初はFacebook(現Meta)がReactのために開発した言語拡張。
+
+JSXはReactとともに普及し、  
+現在ではマークアップのデファクトスタンダードとなっている。
+
+これにより、周辺ツールチェーンの恩恵を受けやすいのも大きなメリット。
+
+- Parser
+- Linter / Formatter
+- Transformer
+- etc...
 
 ---
 
 ## SolidJS
 
-3年前、SolidJS(v1)が登場。Reactと同じくJSXを採用しながら、仮想DOMを使わない宣言的UIを実現。  
-(v0.1から数えると6年前から仮想DOMもdirty checkも使わない宣言的UIを実現していた)
+3年前、SolidJS(v1)が登場。Reactと同じくJSXを採用しながら、仮想DOMを使わない宣言的UIを実現。
 
 状態は全てSignalで管理。Signalの値が変化すると、それを検知して該当のSignalが使われたDOMを更新。
 
@@ -313,9 +440,6 @@ function App() {
 
 SolidJSとは異なり独自の文法を提供しているため、「SolidJSのような制約を軽減している」とも言える。そもそもリターンを書かないから早期リターンもない。
 
-Vue Vaporは仮想DOMモードと同じコード(SFC)で利用できる。  
-Svelte 5はSvelte 3,4の文法もサポートしている。新しい文法もmigrationツールで移行が容易。
-
 ---
 
 ## SolidJS と Svelte 5 と Vue Vapor
@@ -373,120 +497,14 @@ _Virtual DOM is pure overhead_ に対する1つの答えが
 
 ---
 
-## Preact
+## 群雄割拠 Signals
 
-実はPreactもFine-Grained Reactivityを**部分的に**実現している。
+Fine-Grained Reactivityの基本はSignals。  
+このSignal、各フレームワークが独自に実装している。当然互換性はない。
 
-`@preact/signals` というパッケージを使うことで、Signalを利用できる。  
-このSignalをJSX内で利用すると、Signalが変化した時に仮想DOMを経由せず該当のDOM要素だけを更新する。
+そこで、TC39のプロポーザルとしてSignals標準化の動きがある。(Stage 1)
 
-Hooksも併せて利用でき、 `useState` などで状態が変化した際は仮想DOMで差分検知が行われる。
-
-ハイブリッドなアプローチで非常に勝手が良さそうに見えるものの、  
-Fine-Grained Reactivityの適用範囲が狭いため**圧倒的な優位はない**。
-
----
-
-## Reactの答え
-
-_Virtual DOM is pure overhead_ に対するReactの答えが  
-**React Compiler**。
-
-仮想DOMの主な問題は、仮想DOMツリーの差分検出コストと再構築コスト。
-React Compilerは後者の再構築コストを削減することで、仮想DOMの問題を解決しようとしている。
-
-<v-clicks>
-
-- 状態が変化すると、仮想DOM**ツリー**を再構築する必要がある
-- →ひとつの状態変化に対して、複数のコンポーネントが再構築される
-- ひとつひとつのコンポーネントのアロケーションコスト、塵も積もれば山となる
-
-</v-clicks>
-
----
-
-## 例：仮想DOMオブジェクトのアロケーションコスト削減
-
-<div class="grid grid-cols-2 gap-1">
-
-```jsx
-function App({ name }) {
-  return <h1>Hello {name}!</h1>;
-}
-```
-
-<v-click>
-
-```jsx
-function App(t0) {
-  const $ = _c(2);
-  const { name } = t0;
-  let t1;
-  if ($[0] !== name) {
-    t1 = <h1>Hello {name}!</h1>;
-    $[0] = name;
-    $[1] = t1;
-  } else {
-    t1 = $[1]; // nameが同じ→再利用
-  }
-  return t1;
-}
-```
-
-</v-click>
-
-</div>
-
----
-
-## 例：関数のアロケーションコスト削減
-
-<div class="grid grid-cols-2 gap-1">
-
-```jsx
-function List({ items }) {
-  return (
-    <ul>
-      {item.map((item) => {
-        return <li>{item}</li>;
-      })}
-    </ul>
-  );
-}
-```
-
-<v-click>
-
-```jsx
-function List(t0) {
-  const $ = _c(4);
-  const { items } = t0;
-  let t1;
-  if ($[0] !== items) {
-    t1 = items.map(_temp);
-  // . . .
-}
-function _temp(item) {
-  return <li>{item}</li>;
-}
-```
-
-</v-click>
-
-</div>
-
----
-
-## React Compiler
-
-Reactのルールに従って記述されたコンポーネントを最適化する。
-
-1. 仮想DOMオブジェクトをキャッシュする
-2. インライン関数を(トップレベルに移動する/キャッシュする)
-
-これをコンパイルで行うことで、アロケーションコストを徹底的に削減する。
-
-Reactのルールに従っていないコンポーネントは矯正する(ESLintプラグイン)。
+現状すぐに使えるわけではないが、標準化されれば各Fine-Grained Reactivity系フレームワークの互換性が向上する可能性もある。
 
 ---
 
