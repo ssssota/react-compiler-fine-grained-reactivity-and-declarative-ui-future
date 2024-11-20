@@ -47,8 +47,14 @@ h1 {
 株式会社ZOZO フロントエンドエンジニア（テックリード）
 
 ```json
-{ "x": "ssssotaro", "github": "ssssota" }
+{
+  "x": "ssssotaro",
+  "bsky": "ssssota.bsky.social",
+  "github": "ssssota"
+}
 ```
+
+仕事ではReact、趣味はSvelteかPreactを使っていることが多いです。
 
 <style>
 ruby {
@@ -61,12 +67,20 @@ rt {
 
 ---
 
-## 宣言的UIと仮想DOMのはなし
+## 宣言的UIのはなし
 
 宣言的UIはWeb開発の標準となり、Webだけでなくモバイルアプリケーションやデスクトップアプリケーションにも広がりを見せている。
-いつの間に...？
 
-...
+- Web: React, Vue.js, Svelte, etc...
+- モバイル: React Native, Flutter, SwiftUI, Jetpack Compose, etc...
+
+APIはそれぞれ少しずつ異なるものの、**「状態をもとにUIを宣言する」**という基本的な考え方は共通している。
+
+今日はWeb開発における宣言的UIのこれまでとこれからを考える。
+
+---
+
+## 宣言的UIと仮想DOM
 
 10年前、我々は**仮想DOM**という概念に魂を震えさせていた。
 
@@ -354,7 +368,22 @@ _Virtual DOM is pure overhead_ に対する1つの答えが
 
 オブジェクトや関数のアロケーションも、関数コンポーネント自体は一度しか呼ばれないので問題にならない。
 
-主なプレイヤーは**SolidJS**、**Svelte 5**、**Vue Vapor**。
+主なプレイヤーは**SolidJS**、**Svelte 5**、**Vue Vapor**。  
+（Vue Vaporは仮想DOMモードとの併用も可能）
+
+---
+
+## Preact
+
+実はPreactもFine-Grained Reactivityを**部分的に**実現している。
+
+`@preact/signals` というパッケージを使うことで、Signalを利用できる。  
+このSignalをJSX内で利用すると、Signalが変化した時に仮想DOMを経由せず該当のDOM要素だけを更新する。
+
+Hooksも併せて利用でき、 `useState` などで状態が変化した際は仮想DOMで差分検知が行われる。
+
+ハイブリッドなアプローチで非常に勝手が良さそうに見えるものの、  
+Fine-Grained Reactivityの適用範囲が狭いため**圧倒的な優位はない**。
 
 ---
 
@@ -363,7 +392,8 @@ _Virtual DOM is pure overhead_ に対する1つの答えが
 _Virtual DOM is pure overhead_ に対するReactの答えが  
 **React Compiler**。
 
-基本的には、仮想DOMツリー構築が問題だった。なぜ問題か？
+仮想DOMの主な問題は、仮想DOMツリーの差分検出コストと再構築コスト。
+React Compilerは後者の再構築コストを削減することで、仮想DOMの問題を解決しようとしている。
 
 <v-clicks>
 
@@ -372,12 +402,6 @@ _Virtual DOM is pure overhead_ に対するReactの答えが
 - ひとつひとつのコンポーネントのアロケーションコスト、塵も積もれば山となる
 
 </v-clicks>
-
-<v-click>
-
-この問題に対してReact Compilerは最適化を図る。
-
-</v-click>
 
 ---
 
@@ -403,7 +427,7 @@ function App(t0) {
     $[0] = name;
     $[1] = t1;
   } else {
-    t1 = $[1];
+    t1 = $[1]; // nameが同じ→再利用
   }
   return t1;
 }
@@ -453,16 +477,74 @@ function _temp(item) {
 
 ---
 
-## React Compilerの課題(?)
+## React Compiler
 
-React Compilerは、開発者にReactのルールを強制する。
+Reactのルールに従って記述されたコンポーネントを最適化する。
 
-これに対し、JavaScriptの意味論が変わってしまうという意見もある。
+1. 仮想DOMオブジェクトをキャッシュする
+2. インライン関数を(トップレベルに移動する/キャッシュする)
+
+これをコンパイルで行うことで、アロケーションコストを徹底的に削減する。
+
+Reactのルールに従っていないコンポーネントは矯正する(ESLintプラグイン)。
 
 ---
 
-## Million.js
+## ここまでのまとめ
 
-ReactのReconcilerを差し替え、dirty checkにすることで、高速化を図っていた。
+仮想DOMが宣言的UIを広めてきたが、仮想DOMのオーバーヘッドは否めない。
 
-現在はLinterに注力されている模様。(新しいドキュメントではLinterのみが紹介されている)
+Reactはこの問題を解決するためにReact Compilerを開発中。React Compilerは名前の通りReact(のコンポーネント)をコンパイルする。
+
+他のライブラリはSignalを使ったFine-Grained Reactivityに注力している。
+Fine-Grained Reactivityでは仮想DOMを使わず、状態に追従する実際のDOM要素を作り出す。
+
+---
+
+## 共通点
+
+Fine-Grained ReactivityとReact Compilerは共通点がある。
+それは、開発者が書いたコードを変換(・コンパイル)して最適化するという点。
+
+_(TypeScriptやJSXは大前提として省略して)_
+
+<v-clicks>
+
+- React CompilerはReactコンポーネントをコンパイルして最適化する
+- Fine-Grained ReactivityはSignalを使ったコンポーネントを  
+  変換して実際のDOMを返す関数に変換する
+
+</v-clicks>
+
+---
+
+## これからの宣言的UIに必要な要素
+
+<v-clicks>
+
+1. パフォーマンス
+   - 命令型のコード(=フレームワークなし)に漸近するスピード
+2. 開発体験
+   - 開発者が違和感のないコードを書けること
+   - 外部ツールとの親和性
+
+</v-clicks>
+
+---
+
+## 宣言的UIのこれから
+
+最初にも述べた通り宣言的UIは **「状態をもとにUIを宣言する」**。  
+いかに状態を作り、それをUIに反映するかということ。
+
+ただ仮想DOMを使う単純に仮想DOMを使うのではなく、
+ReactはReact Compilerを使いつつも仮想DOMを使い続けるし、  
+それ以外はFine-Grained Reactivityに注力する。
+
+一方で、仮想DOMが極端に**遅いわけではない**。  
+我々は現実的なスピードで動作するWebアプリを作っているし、使えている。
+
+新しいFine-Grained Reactivityという選択肢を頭に入れつつ、  
+それぞれの進化に注目していきたい。
+
+---
