@@ -7,22 +7,22 @@
 .slidev-layout {
   @apply tracking-wide;
   :where(h1) {
-    @apply text-6xl leading-20 my-8;
+    @apply font-bold text-6xl leading-20 my-8;
   }
   :where(h2) {
-    @apply text-4xl my-6;
+    @apply font-bold text-4xl my-6;
   }
   :where(h3) {
-    @apply text-3xl my-6;
+    @apply font-bold text-3xl my-6;
   }
   :where(h4) {
-    @apply text-2xl my-4;
+    @apply font-bold text-2xl my-4;
   }
   :where(h5) {
-    @apply text-2xl my-4;
+    @apply font-bold text-2xl my-4;
   }
   :where(h6) {
-    @apply text-2xl my-4;
+    @apply font-bold text-2xl my-4;
   }
   :where(p) {
     @apply text-2xl my-4;
@@ -43,6 +43,21 @@
   }
   --slidev-code-font-size: 1.25rem;
   --slidev-code-line-height: 1.5rem;
+}
+
+.slidev-layout.cover {
+  h1 {
+    background-color: #2b90b6;
+    background-image: linear-gradient(45deg, #365d62 10%, #146b8c 50%);
+    background-size: 100%;
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -moz-text-fill-color: transparent;
+    font-weight: bold;
+    font-family: "Zen Kaku Gothic New";
+    line-height: 1.2 !important;
+  }
 }
 
 .slidev-layout.cover,

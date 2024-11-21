@@ -23,21 +23,6 @@ fonts:
 
 JSConf JP 2024 - TOMIKAWA Sotaro (ssssota)
 
-<style>
-h1 {
-  background-color: #2B90B6;
-  background-image: linear-gradient(45deg, #365d62 10%, #146b8c 50%);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-text-fill-color: transparent;
-  font-weight: bold;
-  font-family: 'Zen Kaku Gothic New';
-  line-height: 1.2 !important;
-}
-</style>
-
 ---
 
 ## はじめまして！
@@ -67,23 +52,33 @@ rt {
 
 ---
 
-## 宣言的UIのはなし
+## きょうは宣言的UIのはなし
 
 宣言的UIはWeb開発の標準となり、Webだけでなくモバイルアプリケーションやデスクトップアプリケーションにも広がりを見せている。
 
-- Web: React, Vue.js, Svelte, etc...
-- モバイル: React Native, Flutter, SwiftUI, Jetpack Compose, etc...
+- Web: React, Vue.js, Svelte, Preact, etc...
+- モバイル: SwiftUI, Jetpack Compose, React Native, Flutter, etc...
+
+<v-click>
 
 APIはそれぞれ少しずつ異なるものの、  
 **「状態をもとにUIを宣言する」** という基本的な考え方は共通している。
 
 今日はWeb開発における宣言的UIのこれまでとこれからを考える。
 
+</v-click>
+
+---
+layout: cover
+---
+
+# １章 宣言的UIと仮想DOM
+
 ---
 
 ## 宣言的UIと仮想DOM
 
-10年前、我々は**仮想DOM**という概念に魂を震えさせていた。
+10年前、“**仮想DOM**という概念が俺達の魂を震えさせ”ていた。
 
 （仮想DOMは**宣言的UIを実現するための手段**で宣言的UIそのものではないが）  
 宣言的UIをここまで広めたのはReactやVue.jsのような仮想DOMを使ったライブラリの存在といっても過言ではない。
@@ -174,7 +169,7 @@ Svelte作者のRich Harris氏が6年前に公開したブログ。
    - 仮想DOMツリーを探索して、効率よく実際のDOMに適用するための差分を検出する必要がある
    - Reactでは $O(n)$ のアルゴリズムを使っているとされる(コスト小)
 2. 仮想DOMの構築自体コストがかかる
-   - 仮想DOMツリーの構築では何度も様々なアロケーションが発生する
+   - 仮想DOMツリーの構築では様々なアロケーションが何度も発生する
      - 各種配列、仮想DOM自体のオブジェクト、インライン関数、、、
 
 </v-clicks>
@@ -186,11 +181,11 @@ Svelte作者のRich Harris氏が6年前に公開したブログ。
 
 ## React Compiler
 
-React Conf 2021で発表されたReact Compiler (当時React Forget)。  
+今年春発表されたReact Compiler (React Forgetは2021年発表)。  
 これが、先の問題を解決する。
 
 > 2. 仮想DOMの構築自体コストがかかる
->    - 仮想DOMツリーの構築では何度も様々なアロケーションが発生する
+>    - 仮想DOMツリーの構築では様々なアロケーションが何度も発生する
 >      - 各種配列、仮想DOM自体のオブジェクト、インライン関数、、、
 
 <v-click>
@@ -213,9 +208,7 @@ function App({ name }) {
 }
 ```
 
-<v-click>
-
-<a href="https://playground.react.dev/#N4Igzg9grgTgxgUxALhAMygOzgFwJYSYAEAggA5kAUwRmAhgLYJEC+AlEcADrFEwI5YxADwALAIwA+ABIIANnIid6TFgEJhAegmSA3DxYgWQA" target="_blank" rel="noreferrer">
+<a v-click href="https://playground.react.dev/#N4Igzg9grgTgxgUxALhAMygOzgFwJYSYAEAggA5kAUwRmAhgLYJEC+AlEcADrFEwI5YxADwALAIwA+ABIIANnIid6TFgEJhAegmSA3DxYgWQA" target="_blank" rel="noreferrer">
 
 ```jsx
 function App(t0) {
@@ -235,8 +228,6 @@ function App(t0) {
 
 </a>
 
-</v-click>
-
 </div>
 
 ---
@@ -249,7 +240,7 @@ function App(t0) {
 function List({ items }) {
   return (
     <ul>
-      {item.map((item) => {
+      {items.map((item) => {
         return <li>{item}</li>;
       })}
     </ul>
@@ -257,9 +248,7 @@ function List({ items }) {
 }
 ```
 
-<v-click>
-
-<a href="https://playground.react.dev/#N4Igzg9grgTgxgUxALhAMygOzgFwJYSYAEAMnmDgBTBF44IC2YRAvgJRHAA6xRMCOWMUo8iYogB4oAGwB8o8WOB1GAOgYBDAA6VKKhhwC8szgsVj+gmMQnS8s5fQYsJAejuyA3GfHsWPtxl5XjZvTBYQFiA" target="_blank" rel="noreferrer">
+<a v-click href="https://playground.react.dev/#N4Igzg9grgTgxgUxALhAMygOzgFwJYSYAEAMnmDgBTBF44IC2YRAvgJRHAA6xRMCOWMUo8iYogB4oAGwB8o8WOB1GYAHQMAhgAdKlFQw4BeWZwWKx-QTGITpeWcvoMWEgPT3ZAbnPj2LX3cZeV42H0wWEBYgA" target="_blank" rel="noreferrer">
 
 ```jsx
 function List(t0) {
@@ -278,30 +267,70 @@ function _temp(item) {
 
 </a>
 
-</v-click>
-
 </div>
 
 ---
 
 ## React Compiler
 
-我々開発者がカジュアルに書いたインライン関数やオブジェクトは、  
-仮想DOM構築時にアロケーションされる。
+我々開発者がカジュアルに書いた**インライン関数**や**オブジェクト**は、  
+仮想DOM構築時にアロケーションされる。往々にして無駄がある。
 
 それらをReact Compilerが最適化する。
 
 1. 仮想DOMオブジェクトをキャッシュする
 2. インライン関数をトップレベルに移動する/キャッシュする
 
+<v-click>
+
 状態変化時、通常は状態が変化したコンポーネントの子孫も再構築されるが、  
 React Compilerでは再構築されるコンポーネントを最小限に抑える。
 
-Reactのルールに従っていないコンポーネントは矯正する(ESLintプラグイン)。
+</v-click>
 
 ---
 
-## JSXというメリット
+## 仮想DOMのしくみ（with React Compiler）
+
+<div class="grid grid-cols-2 gap-1">
+
+<div>
+
+0\. 初回レンダリング時の仮想DOM
+
+<Excalidraw drawFilePath="./vdom.before.excalidraw" class="h-fit" />
+
+</div>
+
+<div
+  v-click="1"
+  class="outline-blue-500/50 outline-4 m-0"
+  :class="{outline: $clicks === 1 && $renderContext === 'slide'}"
+>
+
+1\. 状態変化時 仮想DOMを再構築する
+
+<Excalidraw drawFilePath="./vdom.after.compiler.excalidraw" class="h-fit" />
+
+</div>
+
+</div>
+
+<div v-click="2">
+
+2\. 仮想DOMが構築できたら、差分を検出する (reconciliation / diffing)
+
+</div>
+<Arrow v-click="3" x1="230" y1="370" x2="500" y2="370" width="5" two-way color="#d21" />
+<div v-click="4">
+
+3\. 検出した差分をもとに、実際のDOMに反映する (render, commit)
+
+</div>
+
+---
+
+## 閑話休題 宣言的UIとJSX
 
 いまでは様々なフレームワークが利用しているJSX。  
 当初はFacebook(現Meta)がReactのために開発した言語拡張。
@@ -309,12 +338,27 @@ Reactのルールに従っていないコンポーネントは矯正する(ESLin
 JSXはReactとともに普及し、  
 現在ではマークアップのデファクトスタンダードとなっている。
 
-これにより、周辺ツールチェーンの恩恵を受けやすいのも大きなメリット。
+独自文法とは異なり周辺ツールチェーンの恩恵を受けやすいのも大きなメリット。
 
 - Parser
 - Linter / Formatter
 - Transformer
 - etc...
+
+---
+
+## 宣言的UIと仮想DOMとReact Compiler
+
+ここまで、**ReactのReactによるReactのためのReact Compiler**を使った _Virtual DOM is pure overhead_ への対応を見てきた。
+これは仮想DOMと共存する道の1つと言える。
+
+一方で、仮想DOMを使わない宣言的UIも存在する。
+
+---
+layout: cover
+---
+
+# ２章 Fine-Grained Reactivity
 
 ---
 
@@ -438,7 +482,11 @@ function App() {
 
 いずれもFine-Grained Reactivityを実現。(Svelte 5は10月リリース、Vue VaporはWIP)
 
-SolidJSとは異なり独自の文法を提供しているため、「SolidJSのような制約を軽減している」とも言える。そもそもリターンを書かないから早期リターンもない。
+SolidJSとは異なり独自の文法を提供しているため、「SolidJSのような制約を軽減している」とも言える。
+そもそもリターンを書かないから早期リターンもない。
+
+一方で、JSXではない故の問題もある。  
+最近はRust製の高速なツールチェーンが登場しているが、対応が後回しになりがち。
 
 ---
 
@@ -462,7 +510,7 @@ defineProps(["name"]);
 </template>
 ```
 
-<v-click>
+<a v-click href="https://vapor-repl.netlify.app/#__VAPOR__eNp9UF1LwzAU/SsxPnSD0SL6NOtAZaA+6FDxxfhQ2rsts/kgSWul9L97k26z4lihND3n3JtzTkuvtY7rCuiUpjY3XDtiwVV6xmQBSy5hYZS2o3dGZSaA0Y/xJZNp0ktRlDoQuswc4JmQdH0WvoTcQVkq0rbEj5GuOwl0Evg0GQzRCeV4VROvnSgHLty3hitGhSqqEu/drvUPF1oZR1qSG8Adbxn+YgrSkaVRgkSYJqk9GP2b8bJeFCfb4APR330jfMexUJV0o+g00zoa73OnBa8JL9Af4mguTRCYYRRncyWXfBVvrJKYpvXbGc2V0LwE86QdV9IyOiWB8VyGRX09BMyZCiY7PF9D/nkA39jGY4wuDFgwNZaz51xmVuB6ev7yCA2e9+SuyiPkM1hVVt5jL7upZIG2B7rg9j60yeXq1c4bB9LuQnmjXtkFPaPY7+2R6L92z+OLMMdkR7sfaXDXKA==" target="_blank" rel="noreferrer">
 
 <!-- prettier-ignore -->
 ```js
@@ -477,7 +525,7 @@ function render(_ctx, $props) {
 }
 ```
 
-</v-click>
+</a>
 
 </div>
 
@@ -497,7 +545,7 @@ _Virtual DOM is pure overhead_ に対する1つの答えが
 
 ---
 
-## 群雄割拠 Signals
+## 閑話休題 Signals
 
 Fine-Grained Reactivityの基本はSignals。  
 このSignal、各フレームワークが独自に実装している。当然互換性はない。
@@ -508,13 +556,14 @@ Fine-Grained Reactivityの基本はSignals。
 
 ---
 
-## ここまでのまとめ
+## 2.7章 いまとこれから
 
-仮想DOMが宣言的UIを広めてきたが、仮想DOMのオーバーヘッドは否めない。
+仮想DOMが宣言的UIを広めてきたが、仮想DOMを使わない宣言的UIも勢力を拡大している。
 
-Reactはこの問題を解決するためにReact Compilerを開発中。React Compilerは名前の通りReact(のコンポーネント)をコンパイルする。
+Reactは仮想DOM由来の問題を解決するためにReact Compilerを開発中。  
+React Compilerは名前の通りReact(のコンポーネント)をコンパイルする。
 
-他のライブラリはSignalを使ったFine-Grained Reactivityに注力している。
+他のライブラリはSignalを使ったFine-Grained Reactivityがアツい。
 Fine-Grained Reactivityでは仮想DOMを使わず、状態に追従する実際のDOM要素を作り出す。
 
 ---
@@ -526,13 +575,12 @@ Fine-Grained ReactivityとReact Compilerは共通点がある。
 
 _(TypeScriptやJSXは大前提として省略して)_
 
-<v-clicks>
+<v-click>
 
-- React CompilerはReactコンポーネントをコンパイルして最適化する
-- Fine-Grained ReactivityはSignalを使ったコンポーネントを  
-  変換して実際のDOMを返す関数に変換する
+- SolidJS, Svelte 5, Vue Vapor: 開発者が書いたコンポーネントを関数コンポーネントに変換
+- React Compiler: 開発者が書いたコンポーネントを最適化
 
-</v-clicks>
+</v-click>
 
 ---
 
@@ -545,24 +593,40 @@ _(TypeScriptやJSXは大前提として省略して)_
 2. 開発体験
    - 開発者が違和感のないコードを書けること
    - 外部ツールとの親和性
+3. 互換性
+   - 既存コードとの親和性
 
 </v-clicks>
 
 ---
 
-## 宣言的UIのこれから
+## 宣言的UIと仮想DOMとFine-Grained Reactivity
 
-最初にも述べた通り宣言的UIは **「状態をもとにUIを宣言する」**。  
-いかに状態を作り、それをUIに反映するかということ。
+宣言的UIはWeb開発の標準となった。
 
-ただ仮想DOMを使う単純に仮想DOMを使うのではなく、
-ReactはReact Compilerを使いつつも仮想DOMを使い続けるし、  
-それ以外はFine-Grained Reactivityに注力する。
+React CompilerやFine-Grained Reactivityは、  
+これからの宣言的UIのキモになるかもしれない。
+
+<v-click>
 
 一方で、仮想DOMが極端に**遅いわけではない**。  
 我々は現実的なスピードで動作するWebアプリを作っているし、使えている。
 
-新しいFine-Grained Reactivityという選択肢を頭に入れつつ、  
-それぞれの進化に注目していきたい。
+</v-click>
+
+<v-click>
+
+新しい技術を注視しつつ、いまある仮想DOMなどの技術と課題を見つめていけばよい。
+
+</v-click>
 
 ---
+
+# まとめ
+
+- 宣言的UIはWebのものではなく、広く使われるようになっている
+- 仮想DOMは宣言的UIを広めたが、オーバーヘッドも問題視されている
+- React CompilerはReactの仮想DOMオーバーヘッドを解決する
+- Fine-Grained Reactivityは仮想DOMを使わず、宣言的UIを実現する
+- これからの宣言的UIにはパフォーマンス、開発体験、互換性が求められる
+- 仮想DOMも死なないので引き続き魂を震わせてOK

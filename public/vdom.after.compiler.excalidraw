@@ -171,7 +171,7 @@
       "width": 81.421875,
       "height": 60.5234375,
       "angle": 0,
-      "strokeColor": "#3333ff",
+      "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -185,8 +185,8 @@
         "type": 2
       },
       "seed": 877090503,
-      "version": 334,
-      "versionNonce": 358141383,
+      "version": 335,
+      "versionNonce": 1507318336,
       "isDeleted": false,
       "boundElements": [
         {
@@ -202,7 +202,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1732194560408,
+      "updated": 1732196067228,
       "link": null,
       "locked": false
     },
@@ -214,7 +214,7 @@
       "width": 11.21999990940094,
       "height": 25,
       "angle": 0,
-      "strokeColor": "#3333ff",
+      "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -226,11 +226,11 @@
       "index": "a8",
       "roundness": null,
       "seed": 316597735,
-      "version": 197,
-      "versionNonce": 599332393,
+      "version": 198,
+      "versionNonce": 869919168,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1732194560408,
+      "updated": 1732196067228,
       "link": null,
       "locked": false,
       "text": "p",
@@ -439,7 +439,7 @@
       "width": 262.78515624999994,
       "height": 40.55859375,
       "angle": 0,
-      "strokeColor": "#3333ff",
+      "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -453,8 +453,8 @@
         "type": 3
       },
       "seed": 138676745,
-      "version": 553,
-      "versionNonce": 1482115079,
+      "version": 554,
+      "versionNonce": 2120389184,
       "isDeleted": false,
       "boundElements": [
         {
@@ -466,7 +466,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1732194560408,
+      "updated": 1732196067228,
       "link": null,
       "locked": false
     },
@@ -478,7 +478,7 @@
       "width": 233.1198455095291,
       "height": 25,
       "angle": 0,
-      "strokeColor": "#3333ff",
+      "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -490,11 +490,11 @@
       "index": "aF",
       "roundness": null,
       "seed": 422043881,
-      "version": 487,
-      "versionNonce": 1906728937,
+      "version": 488,
+      "versionNonce": 2088153536,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1732194560408,
+      "updated": 1732196067228,
       "link": null,
       "locked": false,
       "text": "Welcome to the session.",
