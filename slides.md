@@ -41,12 +41,21 @@ JSConf JP 2024 - TOMIKAWA Sotaro (ssssota)
 
 仕事ではReact、趣味はSvelteかPreactを使っていることが多いです。
 
+![](https://github.com/ssssota.png)
+
 <style>
 ruby {
   font-size: 3rem;
 }
 rt {
   font-size: 1rem;
+}
+img {
+  position: absolute;
+  right: 5rem;
+  top: 5rem;
+  width: 10rem;
+  height: 10rem;
 }
 </style>
 
@@ -160,8 +169,9 @@ function App({ name }) {
 
 ## Virtual DOM is pure overhead
 
-Svelte作者のRich Harris氏が6年前に公開したブログ。  
-今後の宣言的UIを考える上でのキーワード。仮想DOMは純粋なオーバーヘッド。
+「仮想DOMは純粋なオーバーヘッドである」  
+Svelte作者のRich Harris氏が6年前に公開したブログのタイトル。  
+今後の宣言的UIを考える上での重要なキーワード。
 
 <v-clicks>
 
@@ -169,7 +179,7 @@ Svelte作者のRich Harris氏が6年前に公開したブログ。
    - 仮想DOMツリーを探索して、効率よく実際のDOMに適用するための差分を検出する必要がある
    - Reactでは $O(n)$ のアルゴリズムを使っているとされる(コスト小)
 2. 仮想DOMの構築自体コストがかかる
-   - 仮想DOMツリーの構築では様々なアロケーションが何度も発生する
+   - 仮想DOMツリーの構築では様々な計算やアロケーションが何度も発生する
      - 各種配列、仮想DOM自体のオブジェクト、インライン関数、、、
 
 </v-clicks>
@@ -185,12 +195,12 @@ Svelte作者のRich Harris氏が6年前に公開したブログ。
 これが、先の問題を解決する。
 
 > 2. 仮想DOMの構築自体コストがかかる
->    - 仮想DOMツリーの構築では様々なアロケーションが何度も発生する
+>    - 仮想DOMツリーの構築では様々な計算やアロケーションが何度も発生する
 >      - 各種配列、仮想DOM自体のオブジェクト、インライン関数、、、
 
 <v-click>
 
-様々なアロケーションとは？どのように解決するのか？
+*様々な計算やアロケーション*とは？どのように解決するのか？
 
 </v-click>
 
@@ -198,7 +208,7 @@ Svelte作者のRich Harris氏が6年前に公開したブログ。
 
 ---
 
-## 例：仮想DOMオブジェクトのアロケーションコスト削減
+## 例：仮想DOMオブジェクトの計算・アロケーションコスト削減
 
 <div class="grid grid-cols-2 gap-1">
 
@@ -232,7 +242,7 @@ function App(t0) {
 
 ---
 
-## 例：関数のアロケーションコスト削減
+## 例：関数の計算・アロケーションコスト削減
 
 <div class="grid grid-cols-2 gap-1">
 
@@ -273,10 +283,10 @@ function _temp(item) {
 
 ## React Compiler
 
-我々開発者がカジュアルに書いた**インライン関数**や**オブジェクト**は、  
-仮想DOM構築時にアロケーションされる。往々にして無駄がある。
+`useMemo` や `React.memo` を使えばできなくもないが、
+開発者がそれを意識しなければならなかった。
 
-それらをReact Compilerが最適化する。
+これらのコストをReact Compilerが最適化する。
 
 1. 仮想DOMオブジェクトをキャッシュする
 2. インライン関数をトップレベルに移動する/キャッシュする
@@ -352,7 +362,11 @@ JSXはReactとともに普及し、
 ここまで、**ReactのReactによるReactのためのReact Compiler**を使った _Virtual DOM is pure overhead_ への対応を見てきた。
 これは仮想DOMと共存する道の1つと言える。
 
+(仮想DOMのVue.js SFCもコンパイルを伴うため最適化が行われている)
+
 一方で、仮想DOMを使わない宣言的UIも存在する。
+
+[*]: https://vuejs.org/guide/extras/rendering-mechanism.html#compiler-informed-virtual-dom
 
 ---
 layout: cover
@@ -366,7 +380,7 @@ layout: cover
 
 3年前、SolidJS(v1)が登場。Reactと同じくJSXを採用しながら、仮想DOMを使わない宣言的UIを実現。
 
-状態は全てSignalで管理。Signalの値が変化すると、それを検知して該当のSignalが使われたDOMを更新。
+状態は全てSignalsで管理。Signalsの値が変化すると、それを検知して該当のSignalsが使われたDOMを更新。
 
 <v-click>
 
@@ -378,53 +392,114 @@ layout: cover
 
 ---
 
-## Signal / Signals
+## Signals
 
-Fine-Grained Reactivityのベースにあるのが**Signal**。SignalはStreamやObservableのような概念で、単一の値を持ちその値が変化すると通知できる。
+Fine-Grained Reactivityのベースにあるのが**Signals**。SignalsはStreamやObservableのような概念で、単一の値を持ちその値が変化すると通知できる。
 
-StreamやObservableではなく、Signalが宣言的UIで重宝されるのはインターフェースと柔軟性のバランスが取れているため。
+StreamやObservableではなく、Signalsが宣言的UIで重宝されるのはインターフェースと柔軟性のバランスが取れているため。
 
-暗黙的な購読は特徴的。以下は複数の状態を購読する例。
+---
 
-````md magic-move
-```js
+## Signals
+
+<div class="grid grid-cols-[auto_auto] grid-rows-2 gap-1">
+
+これらは状態を購読する例。
+
+<v-click>
+
+```jsx
 // React Hooks
 const [count, setCount] = useState(0);
-const [message, setMessage] = useState("");
 useEffect(() => {
-  console.log(count, message);
-}, [count, message]);
+  console.log(count);
+}, [count]);
 ```
 
+</v-click>
+<v-click>
+
 ```js
-// Observable (RxJS)
-const count$ = new Subject(0);
-const message$ = new Subject("");
-zip(count$, message$).subscribe(([count, message]) => {
-  console.log(count, message);
+// Svelte (svelte/store)
+const count = writable(0);
+count.subscribe((value) => {
+  console.log(value);
 });
 ```
 
+</v-click>
+<v-click>
+
 ```js
-// Vue.js Composition API (=Signal)
+// Vue.js (@vue/reactivity)
 const count = ref(0);
-const message = ref("");
 watchEffect(() => {
-  console.log(count.value, message.value);
+  console.log(count.value);
 });
 ```
-````
+
+</v-click>
+</div>
 
 ---
 
 ## SolidJSの弱点
 
-SolidJSのコンポーネントは1度しか実行されない。その1度でコンポーネントのすべての状態を返す必要がある(イメージ)。
+SolidJSのコンポーネントは1度しか実行されない。
+
+1度実行でコンポーネントのすべての状態を返す必要がある(イメージ)。
+
 また、それゆえの制約がある。
+
+---
+
+## SolidJSの弱点 - 制約１
+
+算出プロパティを使う時は関数にする
+
+<a href="https://playground.solidjs.com/anonymous/904d4049-de74-4929-96c2-5dc1d4dea9ef" target="_blank" rel="noreferrer">
+
+<!-- prettier-ignore -->
+````md magic-move
+```jsx
+function App() {
+  const [count, setCount] = createSignal(0);
+  const double = count() * 2;
+  return (
+    <>
+      <p>{count()} * 2 = {double}</p>
+      <button onClick={() => setCount((c) => c + 1)}> +1 </button>
+    </>
+  );
+}
+```
+
+```jsx
+function App() {
+  const [count, setCount] = createSignal(0);
+  const double = () => count() * 2;
+  return (
+    <>
+      <p>{count()} * 2 = {double()}</p>
+      <button onClick={() => setCount((c) => c + 1)}> +1 </button>
+    </>
+  );
+}
+```
+````
+
+</a>
+
+---
+
+## SolidJSの弱点 - 制約２
+
+早期リターンができない
+
+<a href="https://playground.solidjs.com/anonymous/128721e1-e995-4df9-b3f4-7355ff7db176" target="_blank" rel="noreferrer">
 
 ````md magic-move
 ```jsx
-// 早期リターンができない
 function App() {
   const [count, setCount] = createSignal(0);
   if (count() === 0) {
@@ -435,46 +510,18 @@ function App() {
 ```
 
 ```jsx
-// 早期リターンができない
 function App() {
   const [count, setCount] = createSignal(0);
   return (
-    <Show
-      when={count() !== 0}
-      fallback={<button onClick={() => setCount(1)}>Start!</button>}
-    >
-      <p>Count is {count()}</p>
+    <Show when={count() === 0} fallback={<p>Count is {count()}</p>}>
+      <button onClick={() => setCount(1)}>Start!</button>
     </Show>
   );
 }
 ```
-
-```jsx
-// 算出プロパティを使う時は関数にする
-function App() {
-  const [count, setCount] = createSignal(0);
-  const double = count() * 2;
-  return (
-    <p>
-      {count()} * 2 = {double}
-    </p>
-  );
-}
-```
-
-```jsx
-// 算出プロパティを使う時は関数にする
-function App() {
-  const [count, setCount] = createSignal(0);
-  const double = () => count() * 2;
-  return (
-    <p>
-      {count()} * 2 = {double()}
-    </p>
-  );
-}
-```
 ````
+
+</a>
 
 ---
 
@@ -553,6 +600,7 @@ Fine-Grained Reactivityの基本はSignals。
 そこで、TC39のプロポーザルとしてSignals標準化の動きがある。(Stage 1)
 
 現状すぐに使えるわけではないが、標準化されれば各Fine-Grained Reactivity系フレームワークの互換性が向上する可能性もある。
+（パフォーマンスはそれほど変わらない）
 
 ---
 
@@ -568,23 +616,9 @@ Fine-Grained Reactivityでは仮想DOMを使わず、状態に追従する実際
 
 ---
 
-## 共通点
-
-Fine-Grained ReactivityとReact Compilerは共通点がある。
-それは、開発者が書いたコードを変換(・コンパイル)して最適化するという点。
-
-_(TypeScriptやJSXは大前提として省略して)_
-
-<v-click>
-
-- SolidJS, Svelte 5, Vue Vapor: 開発者が書いたコンポーネントを関数コンポーネントに変換
-- React Compiler: 開発者が書いたコンポーネントを最適化
-
-</v-click>
-
----
-
 ## これからの宣言的UIに必要な要素
+
+いまを考えると、これからの宣言的UIには次のような要素が求められると考えられる。
 
 <v-clicks>
 
@@ -628,5 +662,5 @@ React CompilerやFine-Grained Reactivityは、
 - 仮想DOMは宣言的UIを広めたが、オーバーヘッドも問題視されている
 - React CompilerはReactの仮想DOMオーバーヘッドを解決する
 - Fine-Grained Reactivityは仮想DOMを使わず、宣言的UIを実現する
-- これからの宣言的UIにはパフォーマンス、開発体験、互換性が求められる
+- これからの宣言的UIには高いパフォーマンス・開発体験・互換性が求められる
 - 仮想DOMも死なないので引き続き魂を震わせてOK
