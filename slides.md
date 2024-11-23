@@ -340,6 +340,19 @@ React Compilerでは再構築されるコンポーネントを最小限に抑え
 
 ---
 
+## 宣言的UIと仮想DOMとReact Compiler
+
+ここまで、**ReactのReactによるReactのためのReact Compiler**を使った _Virtual DOM is pure overhead_ への対応を見てきた。
+これは仮想DOMと共存する道の1つと言える。
+
+(仮想DOMのVue.js SFCもコンパイルを伴うため最適化が行われている)
+
+一方で、仮想DOMを使わない宣言的UIも存在する。
+
+[*]: https://vuejs.org/guide/extras/rendering-mechanism.html#compiler-informed-virtual-dom
+
+---
+
 ## 閑話休題 宣言的UIとJSX
 
 いまでは様々なフレームワークが利用しているJSX。  
@@ -354,19 +367,6 @@ JSXはReactとともに普及し、
 - Linter / Formatter
 - Transformer
 - etc...
-
----
-
-## 宣言的UIと仮想DOMとReact Compiler
-
-ここまで、**ReactのReactによるReactのためのReact Compiler**を使った _Virtual DOM is pure overhead_ への対応を見てきた。
-これは仮想DOMと共存する道の1つと言える。
-
-(仮想DOMのVue.js SFCもコンパイルを伴うため最適化が行われている)
-
-一方で、仮想DOMを使わない宣言的UIも存在する。
-
-[*]: https://vuejs.org/guide/extras/rendering-mechanism.html#compiler-informed-virtual-dom
 
 ---
 layout: cover
